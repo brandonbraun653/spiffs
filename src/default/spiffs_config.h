@@ -8,41 +8,31 @@
 #ifndef SPIFFS_CONFIG_H_
 #define SPIFFS_CONFIG_H_
 
-// ----------- 8< ------------
-// Following includes are for the linux test build of spiffs
-// These may/should/must be removed/altered/replaced in your target
-#include "params_test.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stddef.h>
-#include <unistd.h>
-#ifdef _SPIFFS_TEST
-#include "testrunner.h"
-#endif
-// ----------- >8 ------------
-
 // compile time switches
+
+#include <string.h>
+#include <stdint.h>
+#include "SEGGER_SYSVIEW.h"
 
 // Set generic spiffs debug output call.
 #ifndef SPIFFS_DBG
-#define SPIFFS_DBG(_f, ...) //printf(_f, ## __VA_ARGS__)
+#define SPIFFS_DBG(_f, ...) //SEGGER_SYSVIEW_PrintfHost(_f, ## __VA_ARGS__)
 #endif
 // Set spiffs debug output call for garbage collecting.
 #ifndef SPIFFS_GC_DBG
-#define SPIFFS_GC_DBG(_f, ...) //printf(_f, ## __VA_ARGS__)
+#define SPIFFS_GC_DBG(_f, ...) //SEGGER_SYSVIEW_PrintfHost(_f, ## __VA_ARGS__)
 #endif
 // Set spiffs debug output call for caching.
 #ifndef SPIFFS_CACHE_DBG
-#define SPIFFS_CACHE_DBG(_f, ...) //printf(_f, ## __VA_ARGS__)
+#define SPIFFS_CACHE_DBG(_f, ...) //SEGGER_SYSVIEW_PrintfHost(_f, ## __VA_ARGS__)
 #endif
 // Set spiffs debug output call for system consistency checks.
 #ifndef SPIFFS_CHECK_DBG
-#define SPIFFS_CHECK_DBG(_f, ...) //printf(_f, ## __VA_ARGS__)
+#define SPIFFS_CHECK_DBG(_f, ...) //SEGGER_SYSVIEW_PrintfHost(_f, ## __VA_ARGS__)
 #endif
 // Set spiffs debug output call for all api invocations.
 #ifndef SPIFFS_API_DBG
-#define SPIFFS_API_DBG(_f, ...) //printf(_f, ## __VA_ARGS__)
+#define SPIFFS_API_DBG(_f, ...) //SEGGER_SYSVIEW_PrintfHost(_f, ## __VA_ARGS__)
 #endif
 
 
@@ -86,7 +76,7 @@
 // for filedescriptor and cache buffers. Once decided for a configuration,
 // this can be disabled to reduce flash.
 #ifndef SPIFFS_BUFFER_HELP
-#define SPIFFS_BUFFER_HELP              0
+#define SPIFFS_BUFFER_HELP              1
 #endif
 
 // Enables/disable memory read caching of nucleus file system operations.
@@ -194,13 +184,16 @@
 // SPIFFS_LOCK and SPIFFS_UNLOCK protects spiffs from reentrancy on api level
 // These should be defined on a multithreaded system
 
+extern void SPIFFS_fs_lock( void *const fs );
+extern void SPIFFS_fs_unlock( void *const fs );
+
 // define this to enter a mutex if you're running on a multithreaded system
 #ifndef SPIFFS_LOCK
-#define SPIFFS_LOCK(fs)
+#define SPIFFS_LOCK(fs) SPIFFS_fs_lock( fs )
 #endif
 // define this to exit a mutex if you're running on a multithreaded system
 #ifndef SPIFFS_UNLOCK
-#define SPIFFS_UNLOCK(fs)
+#define SPIFFS_UNLOCK(fs) SPIFFS_fs_unlock( fs )
 #endif
 
 // Enable if only one spiffs instance with constant configuration will exist
@@ -326,7 +319,7 @@
 // in the api. This function will visualize all filesystem using given printf
 // function.
 #ifndef SPIFFS_TEST_VISUALISATION
-#define SPIFFS_TEST_VISUALISATION         1
+#define SPIFFS_TEST_VISUALISATION         0
 #endif
 #if SPIFFS_TEST_VISUALISATION
 #ifndef spiffs_printf
@@ -353,6 +346,13 @@
 #ifndef SPIFFS_SECURE_ERASE
 #define SPIFFS_SECURE_ERASE 0
 #endif
+
+typedef signed int s32_t;
+typedef unsigned int u32_t;
+typedef signed short s16_t;
+typedef unsigned short u16_t;
+typedef signed char s8_t;
+typedef unsigned char u8_t;
 
 // Types depending on configuration such as the amount of flash bytes
 // given to spiffs file system in total (spiffs_file_system_size),
