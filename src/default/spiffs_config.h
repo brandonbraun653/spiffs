@@ -12,6 +12,7 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <stddef.h>
 #include "SEGGER_SYSVIEW.h"
 
 // Set generic spiffs debug output call.
